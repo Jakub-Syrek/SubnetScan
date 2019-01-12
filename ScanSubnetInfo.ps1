@@ -1,3 +1,47 @@
+$ScriptFol = Split-Path -Parent $MyInvocation.MyCommand.Definition
+
+function Restart-PowerShell-Elevated
+{
+$Script = $ScriptFol + "\ScanSubnetInfo.ps1"
+$ConfirmPreference = “None”
+If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
+{   
+$arguments = " -ExecutionPolicy UnRestricted  & '" + $Script + "'" 
+Start-Process "$psHome\powershell.exe" -Verb "runAs" -ArgumentList $arguments
+Break
+}
+
+}
+
+function Install-Parallel-Execution
+  {
+    [bool]$tr = [Downloader]::new().CheckIfPathExists("C:\TMP") ;
+   if ($tr )
+    {
+    }
+    else
+    {
+    Restart-PowerShell-Elevated ;
+    New-Item -ItemType directory -Path C:\TMP
+    } ;
+
+   
+   if (Get-Module -ListAvailable -Name Start-parallel) 
+     {
+      
+
+       Write-Host "Start-parallel Module exists" ;
+     } 
+   else 
+     {
+       Write-Host "Module does not exist" ;
+       Restart-PowerShell-Elevated ;
+       Install-Module -Name Start-parallel -Force ;
+     }
+  }
+Install-Parallel-Execution ;
+
+
 function Get-UserMachineInfo
  {
      [CmdletBinding()]
@@ -59,3 +103,6 @@ for ( [int]$i = 15 ; $i -le 250 ; $i++ )
   if (Test-Path $txtPath -ErrorAction 'SilentlyContinue' ){Remove-Item $txtPath ;} ;
   $Hosts | Start-Parallel -Scriptblock ${Function:\Get-UserMachineInfo} ;
   Get-Content $txtPath |  Out-GridView ;
+  Invoke-Item $txtPath ;
+
+  pause ;
