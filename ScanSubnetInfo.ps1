@@ -90,22 +90,35 @@ function Get-UserMachineInfo
     
 }
   [array]$output = @() ;
+Function Get-My-Ips
+   {
+     $ip=get-WmiObject Win32_NetworkAdapterConfiguration|Where {$_.Ipaddress.length -gt 1} ;
+     return $ip ;
+   }
+$myIPs = Get-My-Ips ;
+$myIP = $myIPs.ipaddress[0] 
+$IndexOfLastDot = $myIP.lastindexof(".") ;
+$Network = $myIP.substring(0,$IndexOfLastDot) ;
+$LocalNode = $myIP.substring($IndexOfLastDot+1) ;
 
-$ip=get-WmiObject Win32_NetworkAdapterConfiguration|Where {$_.Ipaddress.length -gt 1} 
-$LocalHostIP = $ip.ipaddress[0] 
-$IndexOfLastDot = $LocalHostIP.lastindexof(".") ;
-$Network = $LocalHostIP.substring(0,$IndexOfLastDot) ;
-$LocalNode = $LocalHostIP.substring($IndexOfLastDot+1) ;
+Function Build-Source-array
+{
+param
+([int]$min , [int]$max)
 [array]$Hosts = @() ;
-for ( [int]$i = 15 ; $i -le 250 ; $i++ )
+for ( [int]$i = $min ; $i -le $max ; $i++ )
  {
     $Node = $Network + "." + $i ;
     $Hosts += $Node ;
  }
+ return $Hosts
+ }
+  
+  [array]$Hosts = Build-Source-array "15" "250" ;
   $txtPath = "C:\TMP\tmp.csv"
   if (Test-Path $txtPath -ErrorAction 'SilentlyContinue' ){Remove-Item $txtPath ;} ;
   $Hosts | Start-Parallel -Scriptblock ${Function:\Get-UserMachineInfo} ;
   Get-Content $txtPath |  Out-GridView ;
   Invoke-Item $txtPath ;
-  Write-Host "All threads returned in : $StopWatch.Elapsed.ToString()"
+  Write-Host "All threads returned in :" $StopWatch.Elapsed.ToString()
   pause ;
