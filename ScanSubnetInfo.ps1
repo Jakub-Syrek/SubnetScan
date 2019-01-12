@@ -44,7 +44,6 @@ function Get-UserMachineInfo
 }
   [array]$output = @() ;
 
-#$LocalHostIP = (Get-NetIPAddress -InterfaceAlias 'Local Area Connection* 10').IPAddress[1] ;
 $ip=get-WmiObject Win32_NetworkAdapterConfiguration|Where {$_.Ipaddress.length -gt 1} 
 $LocalHostIP = $ip.ipaddress[0] 
 $IndexOfLastDot = $LocalHostIP.lastindexof(".") ;
@@ -56,19 +55,8 @@ for ( [int]$i = 15 ; $i -le 250 ; $i++ )
     $Node = $Network + "." + $i ;
     $Hosts += $Node ;
  }
-  #$Hosts = ( 'xxx' , 'xxx', 'xxx' ) ;
- 
-  #$output += (Get-UserMachineInfo -HostsListArr $Hosts ) ;
-  $Hosts | Start-Parallel -Scriptblock ${Function:\Get-UserMachineInfo} 
+  if (Test-Path $txtPath ){Remove-Item $txtPath ;} ;
+  $Hosts | Start-Parallel -Scriptblock ${Function:\Get-UserMachineInfo} ;
   $txtPath = "C:\TMP\tmp.csv"
   Get-Content $txtPath |  Out-GridView ;
 
-<#
-  $output[0].ComputerName ;
-  $output[1].ComputerName ;
-  $output[2].UserName ;
-  $output[2].CompModel ;
-  $output[2].WindowsVer ;
-  $output | Out-GridView ;
-  #>
-  #Env:\USERPROFILE\tmp.txt
