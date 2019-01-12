@@ -121,4 +121,4 @@ for ( [int]$i = $min ; $i -le $max ; $i++ )
   Get-Content $txtPath |  Out-GridView ;
   Invoke-Item $txtPath ;
   Write-Host "All threads returned in :" $StopWatch.Elapsed.ToString()
-  pause ;
+ 
