@@ -63,26 +63,29 @@ function Get-UserMachineInfo
                    ComputerName = $comp ;
                    UserName = "null" ;
                    CompModel = "null" ;
+                   WindowsBuild = "null" ;
                    WindowsVer = "null" ;
                    } ;
                    $content |  Export-Csv -Path $txtPath -Append -NoTypeInformation
-                   Write-host "$comp is down" -ForegroundColor Red
+                   Write-output "$comp is down" -ForegroundColor Red
               }Else
               {     
                    
                    $UserName =  (Get-WmiObject -Class win32_computersystem -ComputerName $comp).UserName ;
                    $CompModel = (Get-WmiObject -Class win32_computersystem -ComputerName $comp).Model ;
-                   $WindowsVer = (Get-WmiObject -Class Win32_OperatingSystem -ComputerName $comp).BuildNumber ;
+                   $WindowsBuild = (Get-WmiObject -Class Win32_OperatingSystem -ComputerName $comp).BuildNumber ;
+                   $WindowsVersion = (Get-WmiObject -Class Win32_OperatingSystem -ComputerName $comp).version
                    Start-Sleep -Seconds 1 ;
                          
                    $content = New-Object PSObject -Property @{   
                    ComputerName = $comp ;
                    UserName =  $UserName ;
                    CompModel = $CompModel ;
-                   WindowsVer = $WindowsVer  ;
+                   WindowsBuild = $WindowsBuild ;
+                   WindowsVer = $WindowsVersion  ;
                    }
                    $content |  Export-Csv -Path $txtPath -Append -NoTypeInformation
-                   Write-host "$comp,$UserName,$CompModel,$WindowsVer"  -ForegroundColor Green                                     
+                   Write-output "$comp,$UserName,$CompModel,$WindowsVer"  -ForegroundColor Green                                     
               }
                 
      
@@ -116,7 +119,9 @@ for ( [int]$i = $min ; $i -le $max ; $i++ )
   
   [array]$Hosts = Build-Source-array "15" "250" ;
   $txtPath = "C:\TMP\tmp.csv"
-  if (Test-Path $txtPath -ErrorAction 'SilentlyContinue' ){Remove-Item $txtPath ;} ;
+
+  if (Test-Path $txtPath -IsValid )
+  {Remove-Item $txtPath ;} ;
   $Hosts | Start-Parallel -Scriptblock ${Function:\Get-UserMachineInfo} ;
   Get-Content $txtPath |  Out-GridView ;
   Invoke-Item $txtPath ;
