@@ -7,7 +7,7 @@ $stopwatch =  [system.diagnostics.stopwatch]::StartNew()
 function Restart-PowerShell-Elevated
 {
    $Script = $ScriptFol + "\ScanSubnetInfo.ps1"
-   $ConfirmPreference = ï¿½Noneï¿½
+   $ConfirmPreference = “None”
    If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
     {   
      $arguments = " -ExecutionPolicy UnRestricted  & '" + $Script + "'" 
@@ -72,7 +72,7 @@ function Get-UserMachineInfo
                    WindowsVer = "null" ;
                    } ;
                    $content |  Export-Csv -Path $txtPath -Append -NoTypeInformation
-                   Write-Prompt "$comp is down" -ForegroundColor Red
+                   
               }Else
               {     
                    
@@ -90,7 +90,7 @@ function Get-UserMachineInfo
                    WindowsVer = $WindowsVersion  ;
                    }
                    $content |  Export-Csv -Path $txtPath -Append -NoTypeInformation
-                   Write-Prompt "$comp,$UserName,$CompModel,$WindowsVer"  -ForegroundColor Green                                     
+                                                       
               }         
 }
   
@@ -119,9 +119,10 @@ for ( [int]$i = $min ; $i -le $max ; $i++ )
    $myIP = $myIPs.ipaddress[0] ;
    $IndexOfLastDot = $myIP.lastindexof(".") ;
    $Network = $myIP.substring(0,$IndexOfLastDot) ;
+
    [array]$Hosts = Build-Source-array "15" "250" ;
    $txtPath = "C:\TMP\tmp.csv" ;
-   if (Test-Path $txtPath -IsValid )
+   if ([downloader]::new().CheckIfPathExists($txtPath))
       {Remove-Item $txtPath ;} ;
    
    $Hosts | Start-Parallel -Scriptblock ${Function:\Get-UserMachineInfo} ;
