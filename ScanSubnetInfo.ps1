@@ -1,4 +1,7 @@
 $ScriptFol = Split-Path -Parent $MyInvocation.MyCommand.Definition
+$stopwatch =  [system.diagnostics.stopwatch]::StartNew()
+
+
 
 function Restart-PowerShell-Elevated
 {
@@ -104,5 +107,5 @@ for ( [int]$i = 15 ; $i -le 250 ; $i++ )
   $Hosts | Start-Parallel -Scriptblock ${Function:\Get-UserMachineInfo} ;
   Get-Content $txtPath |  Out-GridView ;
   Invoke-Item $txtPath ;
-
+  Write-Host "All threads returned in : $StopWatch.Elapsed.ToString()"
   pause ;
