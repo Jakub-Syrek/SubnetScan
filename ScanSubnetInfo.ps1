@@ -1,23 +1,24 @@
-﻿function Get-UserMachineInfo
+function Get-UserMachineInfo
  {
      [CmdletBinding()]
      param
      (
-         [string[]]$HostsListArr 
+         [string]$comp 
          
      )
-     [array]$ObjectArray = @()
-     foreach ($comp in $HostsListArr)
-     {
+          $txtPath = "C:\TMP\tmp.csv"
+          
+     
           $ErrorActionPreference =  'SilentlyContinue' ;
           if (-not (Test-Connection -comp $comp -quiet))
               {
-                   $ObjectArray += New-Object PSObject -Property @{   
+                   $content = New-Object PSObject -Property @{   
                    ComputerName = $comp ;
-                   UserName = $null ;
-                   CompModel = $null ;
-                   WindowsVer = $null ;
-                   }
+                   UserName = "null" ;
+                   CompModel = "null" ;
+                   WindowsVer = "null" ;
+                   } ;
+                   $content |  Export-Csv -Path $txtPath -Append -NoTypeInformation
                    Write-host "$comp is down" -ForegroundColor Red
               }Else
               {     
@@ -27,17 +28,18 @@
                    $WindowsVer = (Get-WmiObject -Class Win32_OperatingSystem -ComputerName $comp).BuildNumber ;
                    Start-Sleep -Seconds 1 ;
                          
-                   $ObjectArray += New-Object PSObject -Property @{   
+                   $content = New-Object PSObject -Property @{   
                    ComputerName = $comp ;
                    UserName =  $UserName ;
                    CompModel = $CompModel ;
                    WindowsVer = $WindowsVer  ;
-                   } 
+                   }
+                   $content |  Export-Csv -Path $txtPath -Append -NoTypeInformation
                    Write-host "$comp,$UserName,$CompModel,$WindowsVer"  -ForegroundColor Green                                     
               }
                 
-     }
-     return $ObjectArray ;
+     
+     #return $ObjectArray ;
     
 }
   [array]$output = @() ;
@@ -49,17 +51,24 @@ $IndexOfLastDot = $LocalHostIP.lastindexof(".") ;
 $Network = $LocalHostIP.substring(0,$IndexOfLastDot) ;
 $LocalNode = $LocalHostIP.substring($IndexOfLastDot+1) ;
 [array]$Hosts = @() ;
-for ( [int]$i = 15 ; $i -le 200 ; $i++ )
+for ( [int]$i = 15 ; $i -le 250 ; $i++ )
  {
     $Node = $Network + "." + $i ;
     $Hosts += $Node ;
  }
   #$Hosts = ( 'xxx' , 'xxx', 'xxx' ) ;
  
-  $output += (Get-UserMachineInfo -HostsListArr $Hosts ) ;
+  #$output += (Get-UserMachineInfo -HostsListArr $Hosts ) ;
+  $Hosts | Start-Parallel -Scriptblock ${Function:\Get-UserMachineInfo} 
+  $txtPath = "C:\TMP\tmp.csv"
+  Get-Content $txtPath |  Out-GridView ;
+
+<#
   $output[0].ComputerName ;
   $output[1].ComputerName ;
   $output[2].UserName ;
   $output[2].CompModel ;
   $output[2].WindowsVer ;
   $output | Out-GridView ;
+  #>
+  #Env:\USERPROFILE\tmp.txt
