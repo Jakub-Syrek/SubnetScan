@@ -7,7 +7,7 @@ $stopwatch =  [system.diagnostics.stopwatch]::StartNew()
 function Restart-PowerShell-Elevated
 {
    $Script = $ScriptFol + "\ScanSubnetInfo.ps1"
-   $ConfirmPreference = “None”
+   $ConfirmPreference = ï¿½Noneï¿½
    If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
     {   
      $arguments = " -ExecutionPolicy UnRestricted  & '" + $Script + "'" 
@@ -119,7 +119,6 @@ for ( [int]$i = $min ; $i -le $max ; $i++ )
    $myIP = $myIPs.ipaddress[0] ;
    $IndexOfLastDot = $myIP.lastindexof(".") ;
    $Network = $myIP.substring(0,$IndexOfLastDot) ;
-   $LocalNode = $myIP.substring($IndexOfLastDot+1) ;
    [array]$Hosts = Build-Source-array "15" "250" ;
    $txtPath = "C:\TMP\tmp.csv" ;
    if (Test-Path $txtPath -IsValid )
