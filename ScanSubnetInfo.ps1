@@ -55,8 +55,7 @@ for ( [int]$i = 15 ; $i -le 250 ; $i++ )
     $Node = $Network + "." + $i ;
     $Hosts += $Node ;
  }
-  if (Test-Path $txtPath ){Remove-Item $txtPath ;} ;
-  $Hosts | Start-Parallel -Scriptblock ${Function:\Get-UserMachineInfo} ;
   $txtPath = "C:\TMP\tmp.csv"
+  if (Test-Path $txtPath -ErrorAction 'SilentlyContinue' ){Remove-Item $txtPath ;} ;
+  $Hosts | Start-Parallel -Scriptblock ${Function:\Get-UserMachineInfo} ;
   Get-Content $txtPath |  Out-GridView ;
-
