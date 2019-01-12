@@ -1,4 +1,5 @@
 $ScriptFol = Split-Path -Parent $MyInvocation.MyCommand.Definition
+
 $stopwatch =  [system.diagnostics.stopwatch]::StartNew()
 
 
@@ -44,7 +45,7 @@ function Install-Parallel-Execution
 
 
 
-Install-Parallel-Execution ;
+
 
 
 
@@ -90,23 +91,15 @@ function Get-UserMachineInfo
                    }
                    $content |  Export-Csv -Path $txtPath -Append -NoTypeInformation
                    Write-Prompt "$comp,$UserName,$CompModel,$WindowsVer"  -ForegroundColor Green                                     
-              }
-                
-     
-     #return $ObjectArray ;
-    
+              }         
 }
-  [array]$output = @() ;
+  
 Function Get-My-Ips
    {
      $ip=get-WmiObject Win32_NetworkAdapterConfiguration|Where {$_.Ipaddress.length -gt 1} ;
      return $ip ;
    }
-$myIPs = Get-My-Ips ;
-$myIP = $myIPs.ipaddress[0] 
-$IndexOfLastDot = $myIP.lastindexof(".") ;
-$Network = $myIP.substring(0,$IndexOfLastDot) ;
-$LocalNode = $myIP.substring($IndexOfLastDot+1) ;
+
 
 Function Build-Source-array
 {
@@ -118,19 +111,24 @@ for ( [int]$i = $min ; $i -le $max ; $i++ )
     $Node = $Network + "." + $i ;
     $Hosts += $Node ;
  }
- return $Hosts
+ return $Hosts ;
  }
   
-
-
-
-
-  [array]$Hosts = Build-Source-array "15" "250" ;
-  $txtPath = "C:\TMP\tmp.csv"
-    if (Test-Path $txtPath -IsValid )
-  {Remove-Item $txtPath ;} ;
-  $Hosts | Start-Parallel -Scriptblock ${Function:\Get-UserMachineInfo} ;
-  Get-Content $txtPath |  Out-GridView ;
-  Invoke-Item $txtPath ;
-  Write-Host "All threads returned in :" $StopWatch.Elapsed.ToString()
+   Install-Parallel-Execution ;
+   $myIPs = Get-My-Ips ;
+   $myIP = $myIPs.ipaddress[0] ;
+   $IndexOfLastDot = $myIP.lastindexof(".") ;
+   $Network = $myIP.substring(0,$IndexOfLastDot) ;
+   $LocalNode = $myIP.substring($IndexOfLastDot+1) ;
+   [array]$Hosts = Build-Source-array "15" "250" ;
+   $txtPath = "C:\TMP\tmp.csv" ;
+   if (Test-Path $txtPath -IsValid )
+      {Remove-Item $txtPath ;} ;
+   
+   $Hosts | Start-Parallel -Scriptblock ${Function:\Get-UserMachineInfo} ;
+   
+   Get-Content $txtPath |  Out-GridView ;
+   Invoke-Item $txtPath ;
+   Write-Host "All threads returned in :" $StopWatch.Elapsed.ToString() ;
+   Pause ;
  
