@@ -119,8 +119,7 @@ for ( [int]$i = $min ; $i -le $max ; $i++ )
   
   [array]$Hosts = Build-Source-array "15" "250" ;
   $txtPath = "C:\TMP\tmp.csv"
-
-  if (Test-Path $txtPath -IsValid )
+    if (Test-Path $txtPath -IsValid )
   {Remove-Item $txtPath ;} ;
   $Hosts | Start-Parallel -Scriptblock ${Function:\Get-UserMachineInfo} ;
   Get-Content $txtPath |  Out-GridView ;
