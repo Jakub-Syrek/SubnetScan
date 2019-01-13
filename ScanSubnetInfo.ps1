@@ -1,10 +1,13 @@
-$ScriptFol = Split-Path -Parent $MyInvocation.MyCommand.Definition
-
+if ($MyInvocation.MyCommand.CommandType -eq "ExternalScript")
+{ $ScriptPath = Split-Path -Parent -Path $MyInvocation.MyCommand.Definition }
+else
+{ $ScriptPath = Split-Path -Parent -Path ([Environment]::GetCommandLineArgs()[0]) 
+    if (!$ScriptPath){ $ScriptPath = "." } }
 $stopwatch =  [system.diagnostics.stopwatch]::StartNew()
 Add-Type -AssemblyName PresentationFramework
 function Restart-PowerShell-Elevated
 {
-   $Script = $ScriptFol + "\ScanSubnetInfo.ps1"
+   $Script = $ScriptPath + "\ScanSubnetInfo.ps1"
    $ConfirmPreference = “None”
    If (-NOT ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator"))
     {   
@@ -13,10 +16,19 @@ function Restart-PowerShell-Elevated
      Break
     }
 }
+function CheckIfPathExists([string]$_)
+     {
+       [bool]$pat = $false ;
+       if(Test-Path -Path $_ )
+         {
+          $pat = $true ;
+         }
+       return $pat ;
+     }
 
 function Install-Parallel-Execution
   {
-    [bool]$tr = [Downloader]::new().CheckIfPathExists("C:\TMP") ;
+    [bool]$tr = CheckIfPathExists "C:\TMP" ;
    if ($tr )
     {
     }
@@ -176,7 +188,7 @@ $Window=[Windows.Markup.XamlReader]::Load( $Reader )
 
    
    $txtPath = "C:\TMP\tmp.csv" ;
-   if ([downloader]::new().CheckIfPathExists($txtPath))
+   if (CheckIfPathExists $txtPath)
       {Remove-Item $txtPath ;} ;
    # Open the Window
    $Window.ShowDialog() | Out-Null
