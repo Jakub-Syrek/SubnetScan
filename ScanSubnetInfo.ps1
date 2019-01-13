@@ -134,24 +134,23 @@ for ( [int]$i = $min ; $i -le $max ; $i++ )
 </Window>
 '
 
-# Create the Window Object
 $Reader=(New-Object System.Xml.XmlNodeReader $XAMLWindow)
 $Window=[Windows.Markup.XamlReader]::Load( $Reader )
 
-    # TextChanged Event Handler for Input 
+    
     $TextboxInput = $Window.FindName("Input")
     $TextboxInput.add_TextChanged.Invoke({
     $Network = $TextboxInput.Text
     $ButtonGetService.IsEnabled = $Hosts -ne ''
 })
 
-    # Click Event Handler for ButtonClose
+   
     $ButtonClose = $Window.FindName("ButtonClose")
     $ButtonClose.add_Click.Invoke({
     $Window.Close();
 })
 
-    # Click Event Handler for ButtonGetService
+    
     $ButtonGetService = $Window.FindName("ButtonGetService")
     $ButtonGetService.add_Click.Invoke({
     $Network = $TextboxInput.text.Trim()
